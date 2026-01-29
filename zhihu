@@ -1,0 +1,14 @@
+#!/bin/bash
+# Zhihu article posting wrapper
+# Usage: ./scripts/zhihu "标题" "正文内容"
+#        ./scripts/zhihu -t "标题" -f article.md
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$(dirname "$SCRIPT_DIR")/skills/tweet/.venv"
+
+# Activate venv if it exists
+if [ -d "$VENV_DIR" ]; then
+    source "$VENV_DIR/bin/activate"
+fi
+
+python3 "$SCRIPT_DIR/zhihu_post.py" "$@"
