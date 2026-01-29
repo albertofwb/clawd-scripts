@@ -147,12 +147,20 @@ async def post_article(title: str, content: str, dry_run: bool = False) -> str:
                 await page.wait_for_selector('text="发布成功"', timeout=15000)
                 print("✅ Article published successfully!")
                 
+                # Wait a bit for the publish to fully complete
+                await page.wait_for_timeout(3000)
+                
                 # Extract article URL from current page
                 current_url = page.url
                 # URL format: https://zhuanlan.zhihu.com/p/XXXXX/edit
                 if "/p/" in current_url:
                     article_id = current_url.split("/p/")[1].split("/")[0]
                     article_url = f"https://zhuanlan.zhihu.com/p/{article_id}"
+                    
+                    # Navigate to the published article (close edit mode)
+                    await page.goto(article_url, wait_until="domcontentloaded", timeout=30000)
+                    await page.wait_for_timeout(2000)
+                    
                     return f"✅ Published! URL: {article_url}"
                 
                 return "✅ Article published successfully!"
@@ -170,8 +178,7 @@ async def post_article(title: str, content: str, dry_run: bool = False) -> str:
         except Exception as e:
             await page.screenshot(path="/tmp/zhihu_error.png")
             return f"❌ Error: {e}\nScreenshot saved to /tmp/zhihu_error.png"
-        finally:
-            await page.close()
+        # Don't close the page - leave it open for user to see
 
 
 async def main():
