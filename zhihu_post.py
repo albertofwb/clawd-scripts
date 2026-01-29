@@ -104,7 +104,8 @@ async def post_article(title: str, content: str, dry_run: bool = False) -> str:
             
             await title_input.click()
             await page.wait_for_timeout(500)
-            await title_input.fill(title)
+            # Use type() instead of fill() for better reliability
+            await page.keyboard.type(title, delay=10)
             await page.wait_for_timeout(1000)
             
             # Move to content area using Tab key (most reliable method)
