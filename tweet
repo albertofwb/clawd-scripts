@@ -1,0 +1,14 @@
+#!/bin/bash
+# Twitter/X Post Wrapper Script
+# Usage:
+#   tweet "Your tweet content"
+#   tweet -r URL "Reply content"
+#   tweet --reply URL "Reply content"
+#   tweet --dry-run "Preview content"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$(dirname "$SCRIPT_DIR")/.venv"
+
+# Activate venv and run the Python script
+source "$VENV_DIR/bin/activate"
+python "$SCRIPT_DIR/twitter_post.py" "$@"
