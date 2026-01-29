@@ -124,23 +124,38 @@ async def post_article(title: str, content: str, dry_run: bool = False) -> str:
             
             # Find and click publish button
             print("📤 Publishing...")
-            publish_btn = page.locator('button:has-text("发布")').last  # Use last to get the actual publish button
-            if not await publish_btn.count():
-                publish_btn = page.locator('button:has-text("Publish")').first
-            if not await publish_btn.count():
-                publish_btn = page.locator('.PublishPanel-postButton, .WriteIndex-publishButton').first
-                
-            if not await publish_btn.count():
+            
+            # The publish button is a standalone button with exact text "发布"
+            # Avoid "发布设置" button by using exact match
+            all_buttons = page.locator('button')
+            publish_btn = None
+            
+            for i in range(await all_buttons.count()):
+                btn = all_buttons.nth(i)
+                text = await btn.inner_text()
+                if text.strip() == "发布":
+                    publish_btn = btn
+                    break
+            
+            if not publish_btn:
                 await page.screenshot(path="/tmp/zhihu_debug.png")
                 return "❌ Could not find publish button. Screenshot saved to /tmp/zhihu_debug.png"
             
+            # Wait for button to be enabled (content must be entered first)
+            await page.wait_for_timeout(1000)
+            
+            # Scroll button into view and click
+            await publish_btn.scroll_into_view_if_needed()
+            await page.wait_for_timeout(500)
+            
             # Check if button is enabled
-            is_disabled = await publish_btn.get_attribute("disabled")
+            is_disabled = await publish_btn.is_disabled()
             if is_disabled:
                 await page.screenshot(path="/tmp/zhihu_debug.png")
-                return "❌ Publish button is disabled. Make sure content is valid. Screenshot saved."
+                return "❌ Publish button is disabled. Make sure title and content are entered. Screenshot saved."
             
-            await publish_btn.click()
+            # Click with force to ensure it works
+            await publish_btn.click(force=True)
             print("⏳ Waiting for confirmation...")
             
             # Wait for success dialog to appear
