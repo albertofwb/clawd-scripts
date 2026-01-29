@@ -6,8 +6,10 @@
 #   tweet --reply URL "Reply content"
 #   tweet --dry-run "Preview content"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR="$(dirname "$SCRIPT_DIR")/.venv"
+# Resolve symlinks to get the real script directory
+SCRIPT_PATH="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+VENV_DIR="$SCRIPT_DIR/.venv"
 
 # Activate venv and run the Python script
 source "$VENV_DIR/bin/activate"
